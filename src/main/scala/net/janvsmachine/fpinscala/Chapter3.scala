@@ -149,4 +149,17 @@ object Chapter3 extends App {
     case _                          ⇒ Nil
   }
   assert(zipWith(l, l2)(_ + _) == List(8, 10, 12))
+
+  // Exercise 3.24
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = (sup, sub) match {
+    case (_, Nil)                   ⇒ true
+    case (Nil, _)                   ⇒ false
+    case (Cons(x, xs), Cons(y, ys)) ⇒ (x == y && hasSubsequence(xs, ys)) || hasSubsequence(xs, sub)
+  }
+
+  assert(hasSubsequence(l, Nil))
+  assert(hasSubsequence(Nil, Nil))
+  assert(hasSubsequence(l, List(3, 4)))
+  assert(!hasSubsequence(Nil, List(3, 4)))
+  assert(!hasSubsequence(l, List(4, 3)))
 }

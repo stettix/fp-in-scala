@@ -39,9 +39,8 @@ object Chapter3 {
   
   // Exercise 3.5
   def dropWhile[A](as: List[A], p: A => Boolean): List[A] = as match {
-    case Nil => Nil
-    case Cons(h, t) if !p(h) => as
-    case Cons(h, t) => dropWhile(t, p)
+    case Cons(h, t) if p(h) => dropWhile(t, p)
+    case _ => as
   }
   
   // Exercise 3.6

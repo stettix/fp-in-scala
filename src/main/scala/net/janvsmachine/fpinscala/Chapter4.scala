@@ -25,3 +25,17 @@ object None extends Option[Nothing] {
   def orElse[B >: Nothing](default: B): Option[B] = Some(default)
   def filter(f: Nothing ⇒ Boolean): Option[Nothing] = None
 }
+
+object Chapter4 {
+
+  // Exercise 4.2
+  def variance(xs: Seq[Double]): Option[Double] = xs match {
+    case Seq() ⇒ None
+    case values ⇒ {
+      val m = xs.sum / xs.length
+      val divs = xs.foldLeft(0.0d) { case (acc, x) ⇒ acc + Math.pow(x - m, 2) }
+      Some(divs / xs.length)
+    }
+  }
+
+}

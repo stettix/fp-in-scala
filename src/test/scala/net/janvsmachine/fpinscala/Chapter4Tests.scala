@@ -4,6 +4,8 @@ import org.scalatest.FlatSpec
 
 class Chapter4Tests extends FlatSpec {
 
+  import Chapter4._
+
   val none: Option[String] = None
   val value: Option[String] = Some("42")
 
@@ -25,6 +27,14 @@ class Chapter4Tests extends FlatSpec {
     assert(value.orElse("foo") == value)
     assert(value.filter(v ⇒ true) == value)
     assert(value.filter(v ⇒ false) == None)
+  }
+
+  "The variance of a sequence" should "be None for an empty sequence" in {
+    assert(variance(Seq()) == None)
+  }
+
+  it should "be defined for a non-empty sequence" in {
+    assert(variance(Seq(1.0, 2.0, 3.0)) == Some((1.0 + 0.0 + 1.0) / 3))
   }
 
 }

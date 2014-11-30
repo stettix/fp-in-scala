@@ -26,7 +26,9 @@ object None extends Option[Nothing] {
   def filter(f: Nothing ⇒ Boolean): Option[Nothing] = None
 }
 
-object Chapter4 {
+object Option {
+
+  import Chapter3._
 
   // Exercise 4.2
   def variance(xs: Seq[Double]): Option[Double] = xs match {
@@ -37,5 +39,20 @@ object Chapter4 {
       Some(divs / xs.length)
     }
   }
+
+  // Exercise 4.3
+  def map2a[A, B, C](a: Option[A], b: Option[B])(f: (A, B) ⇒ C): Option[C] = (a, b) match {
+    case (Some(x), Some(y)) ⇒ Some(f(x, y))
+    case _                  ⇒ None
+  }
+
+  def map2[A, B, C](a: Option[A], b: Option[B])(f: (A, B) ⇒ C): Option[C] =
+    a.flatMap(x ⇒ b.map(y ⇒ f(x, y)))
+
+  def sequence[A](xs: List[Option[A]]): Option[List[A]] =
+    foldRight[Option[A], Option[List[A]]](xs, Some(Nil))((x, acc) ⇒ (x, acc) match {
+      case (Some(v), Some(acc)) ⇒ Some(Cons(v, acc))
+      case _                    ⇒ None
+    })
 
 }

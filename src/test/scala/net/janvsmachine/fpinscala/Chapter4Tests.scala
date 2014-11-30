@@ -1,10 +1,14 @@
 package net.janvsmachine.fpinscala
 
+import org.scalacheck.Properties
+import org.scalacheck.Prop._
+import org.scalatest.prop.Checkers
+import org.scalatest.PropSpec
 import org.scalatest.FlatSpec
 
 class Chapter4Tests extends FlatSpec {
 
-  import Chapter4._
+  import Option._
 
   val none: Option[String] = None
   val value: Option[String] = Some("42")
@@ -35,6 +39,38 @@ class Chapter4Tests extends FlatSpec {
 
   it should "be defined for a non-empty sequence" in {
     assert(variance(Seq(1.0, 2.0, 3.0)) == Some((1.0 + 0.0 + 1.0) / 3))
+  }
+
+  "Sequence function" should "combine values when list values are all defined" in {
+    assert(sequence(List()) == Some(List()))
+    assert(sequence(List(Some(1))) == Some(List(1)))
+    assert(sequence(List(Some(1), Some(2), Some(3))) == Some(List(1, 2, 3)))
+  }
+
+  it should "return None if any value in the list is None" in {
+    assert(sequence(List(None)) == None)
+    assert(sequence(List(None, Some(2), Some(3))) == None)
+    assert(sequence(List(Some(1), None, Some(3))) == None)
+    assert(sequence(List(Some(1), Some(2), None)) == None)
+  }
+
+}
+
+class MapTests extends PropSpec with Checkers {
+
+  import Option._
+
+  val f = (x: Int, y: Int) ⇒ x + y
+
+  property("Alternative implementations map should always give some result") {
+    check {
+      forAll { (a: Int, b: Int) ⇒
+        // Not very clever - would be nice if PropSpec could generate optional values - but seems it can't?
+        map2(Some(a), Some(b))(f) == map2a(Some(a), Some(b))(f)
+        map2(None, Some(b))(f) == map2a(None, Some(b))(f)
+        map2(Some(a), None)(f) == map2a(Some(a), None)(f)
+      }
+    }
   }
 
 }

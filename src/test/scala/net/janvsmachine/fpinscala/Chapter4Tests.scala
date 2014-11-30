@@ -54,6 +54,19 @@ class Chapter4Tests extends FlatSpec {
     assert(sequence(List(Some(1), Some(2), None)) == None)
   }
 
+  "Traverse function" should "combine and map values when all list values are defined" in {
+    assert(traverse(List())(_.toString) == Some(List()))
+    assert(traverse(List(Some(1)))(_.toString) == Some(List("1")))
+    assert(traverse(List(Some("1"), Some("2"), Some("3")))(_.toString) == Some(List("1", "2", "3")))
+  }
+
+  it should "return None if any value in the list is None" in {
+    assert(traverse(List(None))(_.toString) == None)
+    assert(traverse(List(None, Some(2), Some(3)))(_.toString) == None)
+    assert(traverse(List(Some(1), None, Some(3)))(_.toString) == None)
+    assert(traverse(List(Some(1), Some(2), None))(_.toString) == None)
+  }
+
 }
 
 class MapTests extends PropSpec with Checkers {

@@ -55,4 +55,12 @@ object Option {
       case _                    ⇒ None
     })
 
+  def traverse[A, B](xs: List[Option[A]])(f: A ⇒ B): Option[List[B]] =
+    foldRight[Option[A], Option[List[B]]](xs, Some(Nil))((x, acc) ⇒ (x, acc) match {
+      case (Some(v), Some(acc)) ⇒ Some(Cons(f(v), acc))
+      case _                    ⇒ None
+    })
+
+  def sequence2[A](xs: List[Option[A]]): Option[List[A]] = traverse(xs)(x ⇒ x)
+
 }

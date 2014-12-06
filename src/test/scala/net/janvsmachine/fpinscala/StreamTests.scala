@@ -23,6 +23,23 @@ class StreamTests extends FlatSpec {
     assert(!empty[Int].exists(_ > 0))
   }
 
+  it should "implement take" in {
+    assert(empty.take(1) == empty)
+    assert(Stream(1, 2, 3, 4).take(0) == empty)
+    assert(Stream(1, 2, 3, 4).take(1).toList == List(1))
+    assert(Stream(1, 2, 3, 4).take(2).toList == List(1, 2))
+    assert(Stream(1, 2, 3, 4).take(10).toList == List(1, 2, 3, 4))
+  }
+
+  it should "implement drop" in {
+    assert(empty.drop(1) == empty)
+    assert(Stream(1, 2, 3, 4).drop(0).toList == List(1, 2, 3, 4))
+    assert(Stream(1, 2, 3, 4).drop(1).toList == List(2, 3, 4))
+    assert(Stream(1, 2, 3, 4).drop(2).toList == List(3, 4))
+    assert(Stream(1, 2, 3, 4).drop(4) == empty)
+    assert(Stream(1, 2, 3, 4).drop(10) == empty)
+  }
+
   it should "implement forAll" in {
     assert(empty[Int].forAll(_ ⇒ false))
     assert(Stream(1, 2, 3).forAll(_ > 0))
@@ -56,6 +73,23 @@ class StreamTests extends FlatSpec {
     def doubler[T] = (x: T) ⇒ Stream(x, x)
     assert(empty.flatMap(doubler) == empty)
     assert(Stream(1, 2, 3).flatMap(doubler).toList == List(1, 1, 2, 2, 3, 3))
+  }
+
+  it should "implement find" in {
+    assert(empty.find(_ ⇒ false) == None)
+    assert(empty.find(_ ⇒ true) == None)
+    assert(Stream(1, 2, 3, 4).find(_ % 2 == 0) == Some(2))
+  }
+
+  it should "implement infinite stream functions" in {
+    assert(constant(1).take(5).toList == List(1, 1, 1, 1, 1))
+    assert(from(0).take(3).toList == List(0, 1, 2))
+    assert(from(2).take(2).toList == List(2, 3))
+
+    assert(fibs.take(1).toList == List(0))
+    assert(fibs.take(2).toList == List(0, 1))
+    assert(fibs.take(3).toList == List(0, 1, 1))
+    assert(fibs.take(7).toList == List(0, 1, 1, 2, 3, 5, 8))
   }
 
 }

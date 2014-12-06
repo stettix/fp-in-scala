@@ -16,6 +16,16 @@ sealed trait Stream[+A] {
     case _           ⇒ z
   }
 
+  def take(n: Int): Stream[A] = this match {
+    case SCons(h, t) if n > 0 ⇒ cons(h(), t().take(n - 1))
+    case _                    ⇒ empty()
+  }
+
+  def drop(n: Int): Stream[A] = this match {
+    case SCons(h, t) if n > 0 ⇒ t().drop(n - 1)
+    case _                    ⇒ this
+  }
+
   def exists2(p: A ⇒ Boolean): Boolean = foldRight(false)((a, res) ⇒ p(a) || res)
 
   def forAll(p: A ⇒ Boolean): Boolean = foldRight(true)((a, res) ⇒ p(a) && res)
@@ -29,6 +39,8 @@ sealed trait Stream[+A] {
   def append[B >: A](s: ⇒ Stream[B]): Stream[B] = foldRight(s)((a, res) ⇒ cons(a, res))
 
   def flatMap[B](f: A ⇒ Stream[B]): Stream[B] = foldRight(empty[B])((a, res) ⇒ f(a).append(res))
+
+  def find(p: A ⇒ Boolean): Option[A] = filter(p).headOption
 
 }
 
@@ -50,4 +62,16 @@ object Stream {
   }
   def empty[A](): Stream[A] = Empty
   def apply[A](as: A*): Stream[A] = if (as.isEmpty) Empty else cons(as.head, apply(as.tail: _*))
+
+  def constant[A](a: A): Stream[A] = cons(a, constant(a))
+
+  def from(start: Int): Stream[Int] = cons(start, from(start + 1))
+
+  def fibs: Stream[Long] = cons(0, cons(1, fibs(0, 1)))
+
+  private def fibs(prev1: Long, prev2: Long): Stream[Long] = {
+    val next = prev1 + prev2
+    cons(next, fibs(prev2, next))
+  }
+
 }

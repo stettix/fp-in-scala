@@ -18,20 +18,25 @@ class StreamTests extends FlatSpec {
     assert(Stream(1, 2, 3).headOption == Some(1))
   }
 
-  "exists" should "do the right thing yea" in {
+  "A stream" should "implement exists" in {
     assert(Stream(1, 2, 3).exists(_ > 2))
     assert(!empty[Int].exists(_ > 0))
   }
 
-  "forAll" should "you know" in {
+  it should "implement forAll" in {
     assert(empty[Int].forAll(_ ⇒ false))
     assert(Stream(1, 2, 3).forAll(_ > 0))
     assert(!Stream(1, 2, 3).forAll(_ < 3))
   }
 
-  "takeWhile" should "behave itself too" in {
+  it should "implement takeWhile" in {
     assert(empty[Int].takeWhile(_ < 3) == empty)
     assert(Stream(1, 2, 3).takeWhile(_ < 3).toList == List(1, 2))
+  }
+
+  it should "implement map" in {
+    assert(empty[Int].map(_.toString) == empty)
+    assert(Stream(1, 2, 3, 4).map(_.toString).toList == List("1", "2", "3", "4"))
   }
 
 }

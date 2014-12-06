@@ -39,4 +39,10 @@ class StreamTests extends FlatSpec {
     assert(Stream(1, 2, 3, 4).map(_.toString).toList == List("1", "2", "3", "4"))
   }
 
+  it should "implement filter" in {
+    assert(empty[Int].filter(_ ⇒ false) == empty)
+    assert(empty[Int].filter(_ ⇒ true) == empty)
+    assert(Stream(1, 2, 3, 4).filter(_ % 2 == 0).toList == List(2, 4))
+  }
+
 }

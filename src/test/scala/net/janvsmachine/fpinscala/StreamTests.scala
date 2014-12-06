@@ -29,4 +29,9 @@ class StreamTests extends FlatSpec {
     assert(!Stream(1, 2, 3).forAll(_ < 3))
   }
 
+  "takeWhile" should "behave itself too" in {
+    assert(empty[Int].takeWhile(_ < 3) == empty)
+    assert(Stream(1, 2, 3).takeWhile(_ < 3).toList == List(1, 2))
+  }
+
 }

@@ -22,10 +22,8 @@ sealed trait Stream[+A] {
 
   def takeWhile(p: A ⇒ Boolean): Stream[A] = foldRight(empty[A])((a, res) ⇒ if (p(a)) cons(a, res.takeWhile(p)) else empty())
 
-  def map[B](f: A ⇒ B): Stream[B] = this match {
-    case SCons(h, t) ⇒ cons(f(h()), t().map(f))
-    case _           ⇒ empty()
-  }
+  def map[B](f: A ⇒ B): Stream[B] = foldRight(empty[B])((a, res) ⇒ cons(f(a), res))
+
 }
 
 case object Empty extends Stream[Nothing] {

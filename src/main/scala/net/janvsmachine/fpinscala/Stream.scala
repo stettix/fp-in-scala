@@ -42,6 +42,12 @@ sealed trait Stream[+A] {
 
   def find(p: A ⇒ Boolean): Option[A] = filter(p).headOption
 
+  // A bit odd - is this right?
+  def map2[B](f: A ⇒ B): Stream[B] = unfold(this) {
+    case SCons(h, t) ⇒ Some((f(h()), t()))
+    case _           ⇒ None
+  }
+
 }
 
 case object Empty extends Stream[Nothing] {
@@ -82,8 +88,9 @@ object Stream {
     val nextVal = prev._1 + prev._2
     Some(nextVal, (prev._2, nextVal))
   }
-  def fibs2: Stream[Long] = cons(0, cons(1, unfold[Long, (Long, Long)]((0, 1))(fibsNext)))
-  def from2(start: Int): Stream[Int] = unfold(start)((last: Int) ⇒ Some((last, last + 1)))
+  def ones = unfold(1)(_ ⇒ Some((1, 1)))
   def constant2[A](a: A): Stream[A] = unfold(a)(_ ⇒ Some((a, a)))
-  def ones = unfold(1)(_ => Some((1, 1)))
+  def from2(start: Int): Stream[Int] = unfold(start)((last: Int) ⇒ Some((last, last + 1)))
+  def fibs2: Stream[Long] = cons(0, cons(1, unfold[Long, (Long, Long)]((0, 1))(fibsNext)))
+
 }

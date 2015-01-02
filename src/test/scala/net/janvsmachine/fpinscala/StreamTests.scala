@@ -92,4 +92,11 @@ class StreamTests extends FlatSpec {
     assert(fibs.take(7).toList == List(0, 1, 1, 2, 3, 5, 8))
   }
 
+  it should "implement unfold, and methods implemented in terms of unfold" in {
+    assert(fibs.take(10).toList == fibs2.take(10).toList)
+    assert(from(5).take(10).toList == from2(5).take(10).toList)
+
+    assert(constant(5).take(10).toList == constant2(5).take(10).toList)
+    assert(ones.take(5).toList == constant2(1).take(5).toList)
+  }
 }

@@ -68,10 +68,22 @@ object Stream {
   def from(start: Int): Stream[Int] = cons(start, from(start + 1))
 
   def fibs: Stream[Long] = cons(0, cons(1, fibs(0, 1)))
-
   private def fibs(prev1: Long, prev2: Long): Stream[Long] = {
     val next = prev1 + prev2
     cons(next, fibs(prev2, next))
   }
 
+  def unfold[A, S](z: S)(f: S ⇒ Option[(A, S)]): Stream[A] = f(z) match {
+    case Some((nextVal, nextState)) ⇒ cons(nextVal, unfold(nextState)(f))
+    case None                       ⇒ Stream.empty()
+  }
+
+  private def fibsNext(prev: (Long, Long)): Option[(Long, (Long, Long))] = {
+    val nextVal = prev._1 + prev._2
+    Some(nextVal, (prev._2, nextVal))
+  }
+  def fibs2: Stream[Long] = cons(0, cons(1, unfold[Long, (Long, Long)]((0, 1))(fibsNext)))
+  def from2(start: Int): Stream[Int] = unfold(start)((last: Int) ⇒ Some((last, last + 1)))
+  def constant2[A](a: A): Stream[A] = unfold(a)(_ ⇒ Some((a, a)))
+  def ones = unfold(1)(_ => Some((1, 1)))
 }

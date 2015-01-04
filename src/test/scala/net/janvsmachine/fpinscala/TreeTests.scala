@@ -11,7 +11,6 @@ class TreeTests extends FlatSpec {
   val branch1 = Branch(leaf1, leaf2)
   val branch2 = Branch(Leaf(101), Leaf(102))
   val branch3 = Branch(branch1, branch2)
-  val t2 = Branch
 
   "A Tree" should "implement size" in {
     assert(size(leaf1) == 1)

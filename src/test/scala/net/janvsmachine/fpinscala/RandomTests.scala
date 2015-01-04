@@ -58,10 +58,4 @@ class RandomTests extends FlatSpec {
     assert(length(ints2(10)(rng)._1) == 10)
   }
 
-  "nonNegativeLessThan" should "generate values in the expected range" in {
-    // Generate a bunch of ints less than a value
-    // For each one, call the function and check that the result is in the right range.
-    //nonNegativeLessThan
-  }
-
 }

@@ -46,11 +46,19 @@ object RNG {
         (Cons(nextVal, acc._1), nextRng)
       })
 
-  def flatMap[A, B](f: Rand[A])(g: A ⇒ Rand[B]): Rand[B] = rng => {
+  def flatMap[A, B](f: Rand[A])(g: A ⇒ Rand[B]): Rand[B] = rng ⇒ {
     val (a, rng2) = f(rng)
     val randB = g(a)
     randB(rng)
   }
+
+  // Exercise 6.9.
+  // map implemented in terms of flatmap.
+  def mapF[A, B](s: Rand[A])(f: A ⇒ B): Rand[B] = flatMap(s)(a ⇒ unit(f(a)))
+
+  // Exercise 6.9.
+  // map2 implemented in terms of flatmap.
+  def map2F[A, B, C](randA: Rand[A], randB: Rand[B])(f: (A, B) ⇒ B): Rand[B] = ???
 
   def nonNegativeLessThan(n: Int): Rand[Int] =
     flatMap(nonNegativeInt) { i ⇒

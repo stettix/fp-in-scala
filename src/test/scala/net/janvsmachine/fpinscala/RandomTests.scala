@@ -8,8 +8,9 @@ import org.scalatest.prop.Checkers
 import org.scalatest.PropSpec
 import List._
 import RNG._
+import org.scalatest.prop.Whenever
 
-class RandomPropSpecs extends PropSpec with Checkers {
+class RandomPropSpecs extends PropSpec with Checkers with Whenever {
 
   property("nonNegativeInt returns values in the correct range") {
     check {
@@ -24,6 +25,17 @@ class RandomPropSpecs extends PropSpec with Checkers {
       forAll { (n: Int) ⇒
         val d = double(SimpleRNG(n))._1
         d >= 0 && d < 1.0
+      }
+    }
+  }
+
+  property("nonNegativeLessThan generates values in the expected range") {
+    check {
+      forAll { (n: Int) ⇒
+        n <= 0 || {
+          val i = nonNegativeLessThan(n)(SimpleRNG(42))._1
+          (i >= 0 && i < n)
+        }
       }
     }
   }
@@ -44,6 +56,12 @@ class RandomTests extends FlatSpec {
     assert(ints2(0)(rng)._1 == Nil)
     assert(length(ints2(1)(rng)._1) == 1)
     assert(length(ints2(10)(rng)._1) == 10)
+  }
+
+  "nonNegativeLessThan" should "generate values in the expected range" in {
+    // Generate a bunch of ints less than a value
+    // For each one, call the function and check that the result is in the right range.
+    //nonNegativeLessThan
   }
 
 }

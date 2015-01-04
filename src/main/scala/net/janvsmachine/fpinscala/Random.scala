@@ -1,6 +1,7 @@
 package net.janvsmachine.fpinscala
 
 import Math._
+import List._
 
 trait RNG {
   def nextInt: (Int, RNG)
@@ -48,6 +49,14 @@ object RNG {
     val (d2, rng3) = double(rng2)
     val (d3, rng4) = double(rng3)
     ((d1, d2, d3), rng4)
+  }
+
+  def ints(count: Int)(rng: RNG): (List[Int], RNG) = {
+    val ns = Stream.from(0).take(count).toList
+    foldLeft(ns, (List[Int](), rng))((acc: (List[Int], RNG), _) ⇒ {
+      val (nextVal, nextRng) = acc._2.nextInt
+      (Cons(nextVal, acc._1), nextRng)
+    })
   }
 
 }

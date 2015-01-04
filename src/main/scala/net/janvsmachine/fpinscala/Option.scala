@@ -28,7 +28,7 @@ object None extends Option[Nothing] {
 
 object Option {
 
-  import Chapter3._
+  import List._
 
   // Exercise 4.2
   def variance(xs: Seq[Double]): Option[Double] = xs match {

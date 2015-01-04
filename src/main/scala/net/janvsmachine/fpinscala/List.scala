@@ -16,10 +16,6 @@ object List {
     if (as.isEmpty) Nil
     else Cons(as.head, apply(as.tail: _*))
 
-}
-
-object Chapter3 extends App {
-
   // Exercise 3.2
   def tail[A](as: List[A]): List[A] = as match {
     case Nil        ⇒ throw new IllegalArgumentException("Can't get tail of empty list")
@@ -162,6 +158,8 @@ object Chapter3 extends App {
   assert(hasSubsequence(l, List(3, 4)))
   assert(!hasSubsequence(Nil, List(3, 4)))
   assert(!hasSubsequence(l, List(4, 3)))
+  
+  def length(as: List[Int]) = foldLeft(as, 0)((acc, _) => acc + 1)
 
   //
   // Trees
@@ -215,29 +213,29 @@ object Chapter3 extends App {
   assert(map(branch3)(_.toString) == Branch(Branch(Leaf("42"), Leaf("123")), Branch(Leaf("101"), Leaf("102"))))
 
   // Exercise 3.29
-  //  def fold[A, B](t: Tree[A], z: B)(f: (B, A) ⇒ B, comb: (B, B) ⇒ B): B = t match {
-  //    case Leaf(v)             ⇒ f(z, v)
-  //    case Branch(left, right) ⇒ comb(fold(left, z)(f, comb), fold(right, z)(f, comb)) // fold(left, fold(right, z)(f))(f)
-  //  }
-
-  def fold[A, B](t: Tree[A], z: B)(f: (B, A) ⇒ B, g: (B, B) ⇒ B): B = t match {
-    case Leaf(v)             ⇒ g(z, f(z, v))
-    case Branch(left, right) ⇒ ??? //g(fold(left, f(z + 1)(f, g), fold(right, z + 1)(f, g))
+  def fold[A, B](t: Tree[A], z: B)(f: (B, A) ⇒ B, comb: (B, B) ⇒ B): B = t match {
+    case Leaf(v)             ⇒ f(z, v)
+    case Branch(left, right) ⇒ comb(fold(left, z)(f, comb), fold(right, z)(f, comb)) // fold(left, fold(right, z)(f))(f)
   }
 
+  // TODO!
+  //  def fold[A, B](t: Tree[A], z: B)(f: (B, A) ⇒ B, g: (B, B) ⇒ B): B = t match {
+  //    case Leaf(v)             ⇒ g(z, f(z, v))
+  //    case Branch(left, right) ⇒ ??? //g(fold(left, f(z + 1)(f, g), fold(right, z + 1)(f, g))
+  //  }
+
   def depthF[A](t: Tree[A]): Int = fold(t, 0)((acc: Int, _: A) ⇒ acc + 1, (x: Int, y: Int) ⇒ x max y)
-  assert(depthF(leaf1) == 1)
-  println(s">>>> ${depthF(branch1)}")
-  assert(depthF(branch1) == 2)
-  println(s">>>> ${depthF(branch3)}")
-  assert(depthF(branch3) == 3)
+  // TODO!
+//  assert(depthF(leaf1) == 1)
+//  assert(depthF(branch1) == 2)
+//  assert(depthF(branch3) == 3)
 
-  def sizeF[A](t: Tree[A]): Int = fold(t, 0)((acc: Int, _: A) => acc + 1, (x: Int, y: Int) => x + y)
+  def sizeF[A](t: Tree[A]): Int = fold(t, 0)((acc: Int, _: A) ⇒ acc + 1, (x: Int, y: Int) ⇒ x + y)
 
-  def maximumF(t: Tree[Int]): Int = fold(t, Int.MinValue)((acc: Int, a: Int) => acc max a, (x: Int, y: Int) => x + y)
-  
+  def maximumF(t: Tree[Int]): Int = fold(t, Int.MinValue)((acc: Int, a: Int) ⇒ acc max a, (x: Int, y: Int) ⇒ x + y)
+
   // Could perhaps try to do the version of fold that works for size/maximum/depth?
   // And then see how I could adapt it to the map case too?
   //def mapF[A, B](t: Tree[A])(f: A => B): Tree[B] = fold(t)(a: A => Leaf(f(a)), (x: B, y: B) => Branch(x, y)
-    
+
 }

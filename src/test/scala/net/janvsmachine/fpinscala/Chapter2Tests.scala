@@ -25,4 +25,3 @@ class Chapter2Tests extends PropSpec with Checkers {
   }
 
 }
-

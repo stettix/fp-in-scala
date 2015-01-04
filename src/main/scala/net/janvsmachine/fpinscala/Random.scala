@@ -1,7 +1,8 @@
 package net.janvsmachine.fpinscala
 
 import Math._
-import List._
+import List.foldLeft
+import States._
 
 trait RNG {
   def nextInt: (Int, RNG)
@@ -20,45 +21,48 @@ case class SimpleRNG(seed: Long) extends RNG {
 
 object RNG {
 
-  type Rand[+A] = RNG ⇒ (A, RNG)
+  type Rand[+A] = State[RNG, A]
 
   val int: Rand[Int] = _.nextInt
 
-  def unit[A](a: A): Rand[A] = rng ⇒ (a, rng)
-
-  def map[A, B](s: Rand[A])(f: A ⇒ B): Rand[B] =
-    rng ⇒ {
-      val (a, rng2) = s(rng)
-      (f(a), rng2)
-    }
-
-  def map2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) ⇒ C): Rand[C] =
-    rng ⇒ {
-      val (a, rng2) = ra(rng)
-      val (b, rng3) = rb(rng2)
-      (f(a, b), rng3)
-    }
-
-  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] =
-    rng ⇒
-      foldLeft(fs, (List[A](), rng))((acc: (List[A], RNG), r: Rand[A]) ⇒ {
-        val (nextVal, nextRng) = r(rng)
-        (Cons(nextVal, acc._1), nextRng)
-      })
-
-  def flatMap[A, B](f: Rand[A])(g: A ⇒ Rand[B]): Rand[B] = rng ⇒ {
-    val (a, rng2) = f(rng)
-    val randB = g(a)
-    randB(rng)
-  }
-
-  // Exercise 6.9.
-  // map implemented in terms of flatmap.
-  def mapF[A, B](s: Rand[A])(f: A ⇒ B): Rand[B] = flatMap(s)(a ⇒ unit(f(a)))
-
-  // Exercise 6.9.
-  // map2 implemented in terms of flatmap.
-  def map2F[A, B, C](randA: Rand[A], randB: Rand[B])(f: (A, B) ⇒ B): Rand[B] = ???
+  // Not needed here anymore, as it's provided by the State type.
+  //
+  //  def unit[A](a: A): Rand[A] = rng ⇒ (a, rng)
+  //
+  //  def map[S, A, B](s: Rand[A])(f: A ⇒ B): Rand[B] =
+  //    rng ⇒ {
+  //      val (a, rng2) = s(rng)
+  //      (f(a), rng2)
+  //    }
+  //
+  //  def map2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) ⇒ C): Rand[C] =
+  //    rng ⇒ {
+  //      val (a, rng2) = ra(rng)
+  //      val (b, rng3) = rb(rng2)
+  //      (f(a, b), rng3)
+  //    }
+  //
+  //  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] =
+  //    rng ⇒
+  //      foldLeft(fs, (List[A](), rng))((acc: (List[A], RNG), r: Rand[A]) ⇒ {
+  //        val (nextVal, nextRng) = r(rng)
+  //        (Cons(nextVal, acc._1), nextRng)
+  //      })
+  //
+  //  def flatMap[A, B](f: Rand[A])(g: A ⇒ Rand[B]): Rand[B] = rng ⇒ {
+  //    val (a, rng2) = f(rng)
+  //    val randB = g(a)
+  //    randB(rng)
+  //  }
+  //
+  //  // Exercise 6.9.
+  //  // map implemented in terms of flatmap.
+  //  def mapF[A, B](s: Rand[A])(f: A ⇒ B): Rand[B] = flatMap(s)(a ⇒ unit(f(a)))
+  //
+  //  // Exercise 6.9.
+  //  // map2 implemented in terms of flatmap.
+  //  def map2F[A, B, C](randA: Rand[A], randB: Rand[B])(f: (A, B) ⇒ B): Rand[B] =
+  //    flatMap(randA)(a ⇒ flatMap(randB)(b ⇒ unit(f(a, b))))
 
   def nonNegativeLessThan(n: Int): Rand[Int] =
     flatMap(nonNegativeInt) { i ⇒
@@ -117,6 +121,7 @@ object RNG {
   def both[A, B](ra: Rand[A], rb: Rand[B]): Rand[(A, B)] = map2(ra, rb)((_, _))
 
   def randIntDouble: Rand[(Int, Double)] = both(int, double)
+
   def randDoubleInt: Rand[(Double, Int)] = both(double, int)
 
 }

@@ -39,6 +39,18 @@ object RNG {
       (f(a, b), rng3)
     }
 
+  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] =
+    rng ⇒
+      foldLeft(fs, (List[A](), rng))((acc: (List[A], RNG), r: Rand[A]) ⇒ {
+        val (nextVal, nextRng) = r(rng)
+        (Cons(nextVal, acc._1), nextRng)
+      })
+
+  def ints2(count: Int): Rand[List[Int]] = {
+    val randInts = List(scala.collection.immutable.List.fill(count)(int): _*)
+    sequence(randInts)
+  }
+
   def nonNegativeInt(rng: RNG): (Int, RNG) = {
     val (n, nextRNG) = rng.nextInt
     val nextVal = if (n == Integer.MIN_VALUE) Integer.MAX_VALUE else abs(n)

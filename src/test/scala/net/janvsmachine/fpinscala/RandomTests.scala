@@ -32,11 +32,18 @@ class RandomPropSpecs extends PropSpec with Checkers {
 
 class RandomTests extends FlatSpec {
 
+  val rng = SimpleRNG(42)
+
   "ints" should "generate the right number of values" in {
-    val rng = SimpleRNG(42)
     assert(ints(0)(rng)._1 == Nil)
     assert(length(ints(1)(rng)._1) == 1)
     assert(length(ints(10)(rng)._1) == 10)
+  }
+
+  "ints2" should "generate the right number of values" in {
+    assert(ints2(0)(rng)._1 == Nil)
+    assert(length(ints2(1)(rng)._1) == 1)
+    assert(length(ints2(10)(rng)._1) == 10)
   }
 
 }

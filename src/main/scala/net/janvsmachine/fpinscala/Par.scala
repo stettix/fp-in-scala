@@ -22,13 +22,6 @@ object Par {
 
   def lazyUnit[A](a: ⇒ A): Par[A] = fork(unit(a))
 
-  def fork[A](a: ⇒ Par[A]): Par[A] =
-    es ⇒ es.submit(new Callable[A] {
-      def call = a(es).get
-    })
-
-  def run[A](s: ExecutorService)(a: Par[A]): Future[A] = a(s)
-
   def map2[A, B, C](pa: Par[A], pb: Par[B])(f: (A, B) ⇒ C): Par[C] =
     (es: ExecutorService) ⇒ {
       val fa = pa(es)
@@ -37,7 +30,7 @@ object Par {
     }
 
   def sequence[A](ps: List[Par[A]]): Par[List[A]] =
-    foldLeft(ps, unit(List[A]()))((acc, p) ⇒ map2(p, acc)(Cons.apply))
+    foldRight(ps, unit(List[A]()))((acc, p) ⇒ map2(acc, p)((x, xs) ⇒ Cons(x, xs)))
 
   def parMap[A, B](ps: List[A])(f: A ⇒ B): Par[List[B]] = fork {
     val fbs = List.map(ps)(asyncF(f))
@@ -49,5 +42,12 @@ object Par {
 
   def map[A, B](pa: Par[A])(f: A ⇒ B): Par[B] =
     map2(pa, unit(()))((a, _) ⇒ f(a))
+
+  def fork[A](a: ⇒ Par[A]): Par[A] =
+    es ⇒ es.submit(new Callable[A] {
+      def call = a(es).get
+    })
+
+  def run[A](s: ExecutorService)(a: Par[A]): Future[A] = a(s)
 
 }

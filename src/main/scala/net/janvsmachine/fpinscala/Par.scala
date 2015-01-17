@@ -55,6 +55,16 @@ object Par {
       def call = a(es).get
     })
 
+  def merge[A](as: IndexedSeq[A], z: A)(f: (A, A) ⇒ A): Par[A] =
+    if (as.length <= 1)
+      unit(as.headOption.getOrElse(z))
+    else {
+      val (l, r) = as.splitAt(as.length / 2)
+      val pl = fork(merge(l, z)(f))
+      val pr = fork(merge(r, z)(f))
+      map2(pl, pr)(f)
+    }
+
   def run[A](s: ExecutorService)(a: Par[A]): Future[A] = a(s)
 
 }

@@ -47,6 +47,16 @@ class ParTest extends FlatSpec {
     assert(eval(r) == List(2, 4))
   }
 
+  "merge" should "merge values in parallel, using log(2) number of operations" in {
+    val l = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+    val r = merge(l, 0)(_ + _)
+    assert(eval(r) == l.foldLeft(0)(_ + _))
+  }
+
+  it should "merge an empty sequence to the zero value" in {
+    assert(eval(merge(Vector(), 0)(_ + _)) == 0)
+  }
+
   private def eval[A](p: Par[A]): A = Par.run(es)(p).get
 
 }

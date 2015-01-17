@@ -7,7 +7,7 @@ import Par._
 
 class ParTest extends FlatSpec {
 
-  val es = Executors.newSingleThreadExecutor()
+  val es = Executors.newCachedThreadPool()
 
   "A parallel computation" should "be have a unit constructor" in {
     assert(eval(unit(42)) == 42)
@@ -32,6 +32,19 @@ class ParTest extends FlatSpec {
   it should "allow sequencing of results" in {
     val p = sequence(List(unit(1), unit(2), unit(3)))
     assert(eval(p) == List(1, 2, 3))
+  }
+
+  "parFilter" should "work as filter for any list" in {
+    def isEven(n: Int) = n % 2 == 0
+
+    assert(eval(parFilter(Nil)(isEven)) == Nil)
+
+    assert(eval(parFilter(List(2))(isEven)) == List(2))
+    assert(eval(parFilter(List(1))(isEven)) == Nil)
+
+    val l = List(1, 2, 3, 4, 5)
+    val r = parFilter(l)(isEven)
+    assert(eval(r) == List(2, 4))
   }
 
   private def eval[A](p: Par[A]): A = Par.run(es)(p).get

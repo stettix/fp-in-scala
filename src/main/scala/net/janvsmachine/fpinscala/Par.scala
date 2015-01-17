@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import List._
+import Option._
 
 case class UnitFuture[A](a: A) extends Future[A] {
   def get(timeout: Long, unit: TimeUnit): A = a
@@ -35,6 +36,12 @@ object Par {
   def parMap[A, B](ps: List[A])(f: A ⇒ B): Par[List[B]] = fork {
     val fbs = List.map(ps)(asyncF(f))
     sequence(fbs)
+  }
+
+  def parFilter[A](ps: List[A])(f: A ⇒ Boolean): Par[List[A]] = fork {
+    val fas = List.map(ps)(asyncF(a ⇒ if (f(a)) Some(a) else None))
+    val asf = sequence(fas)
+    map(asf)(l ⇒ Option.sequence(l).getOrElse(Nil))
   }
 
   def asyncF[A, B](f: A ⇒ B): A ⇒ Par[B] =

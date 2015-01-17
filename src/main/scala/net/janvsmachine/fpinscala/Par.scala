@@ -1,8 +1,10 @@
 package net.janvsmachine.fpinscala
 
+import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
+import List._
 
 case class UnitFuture[A](a: A) extends Future[A] {
   def get(timeout: Long, unit: TimeUnit): A = a
@@ -20,17 +22,32 @@ object Par {
 
   def lazyUnit[A](a: ⇒ A): Par[A] = fork(unit(a))
 
-  def fork[A](a: ⇒ Par[A]): Par[A] = ???
+  def fork[A](a: ⇒ Par[A]): Par[A] =
+    es ⇒ es.submit(new Callable[A] {
+      def call = a(es).get
+    })
 
-  def run[A](s: ExecutorService)(a: Par[A]): A = ???
+  def run[A](s: ExecutorService)(a: Par[A]): Future[A] = a(s)
 
-  def map2[A, B, C](a: Par[A], b: Par[B])(f: (A, B) ⇒ C) =
+  def map2[A, B, C](pa: Par[A], pb: Par[B])(f: (A, B) ⇒ C): Par[C] =
     (es: ExecutorService) ⇒ {
-      val fa = a(es)
-      val fb = b(es)
+      val fa = pa(es)
+      val fb = pb(es)
       UnitFuture(f(fa.get, fb.get))
     }
 
-  def asyncF[A, B](f: A ⇒ B): A ⇒ Par[B] = a ⇒ lazyUnit(f(a))
+  def sequence[A](ps: List[Par[A]]): Par[List[A]] =
+    foldLeft(ps, unit(List[A]()))((acc, p) ⇒ map2(p, acc)(Cons.apply))
+
+  def parMap[A, B](ps: List[A])(f: A ⇒ B): Par[List[B]] = fork {
+    val fbs = List.map(ps)(asyncF(f))
+    sequence(fbs)
+  }
+
+  def asyncF[A, B](f: A ⇒ B): A ⇒ Par[B] =
+    a ⇒ lazyUnit(f(a))
+
+  def map[A, B](pa: Par[A])(f: A ⇒ B): Par[B] =
+    map2(pa, unit(()))((a, _) ⇒ f(a))
 
 }

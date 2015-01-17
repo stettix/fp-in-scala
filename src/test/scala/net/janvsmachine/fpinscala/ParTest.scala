@@ -47,14 +47,43 @@ class ParTest extends FlatSpec {
     assert(eval(r) == List(2, 4))
   }
 
+  val l = Vector(1, 2, 3, 8, 9, 10, 4, 5, 6, 7)
+
   "merge" should "merge values in parallel, using log(2) number of operations" in {
-    val l = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
     val r = merge(l, 0)(_ + _)
     assert(eval(r) == l.foldLeft(0)(_ + _))
   }
 
+  it should "find the max of a vector in parallel" in {
+    val r = merge(l, Integer.MIN_VALUE)(_ max _)
+    assert(eval(r) == 10)
+  }
+
+  it should "count the number of words in a sequence of paragraphs" in {
+    val paragraphs = Vector("Lorem ipsum dolor sit amet",
+      "consectetur adipiscing elit", "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+      "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum")
+
+    def numWords(paragraph: String) = paragraph.split(" ").filter(_.length > 0).size
+
+    //val wordCount = merge(paragraphs, 0)((w1, w2) ⇒ numWords(_) + numWords(_))
+    // TODO!
+  }
+
   it should "merge an empty sequence to the zero value" in {
     assert(eval(merge(Vector(), 0)(_ + _)) == 0)
+  }
+
+  "map3" should "map 3 parallel computations into 1 value" in {
+    val res = map3(unit(1), unit(2), unit(3))((_, _, _))
+    assert(eval(res) == (1, 2, 3))
+  }
+
+  "map4" should "map 4 parallel computations into 1 value" in {
+    val res = map4(unit(1), unit(2), unit(3), unit(4))((_, _, _, _))
+    assert(eval(res) == (1, 2, 3, 4))
   }
 
   private def eval[A](p: Par[A]): A = Par.run(es)(p).get

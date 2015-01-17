@@ -50,6 +50,24 @@ object Par {
   def map[A, B](pa: Par[A])(f: A ⇒ B): Par[B] =
     map2(pa, unit(()))((a, _) ⇒ f(a))
 
+  def map3[A, B, C, D](pa: Par[A], pb: Par[B], pc: Par[C])(f: (A, B, C) ⇒ D): Par[D] =
+    (es: ExecutorService) ⇒ {
+      val fa = pa(es)
+      val fb = pb(es)
+      val fc = pc(es)
+      UnitFuture(f(fa.get, fb.get, fc.get))
+    }
+
+  // Could this be written in terms of map2?
+  def map4[A, B, C, D, E](pa: Par[A], pb: Par[B], pc: Par[C], pd: Par[D])(f: (A, B, C, D) ⇒ E): Par[E] =
+    (es: ExecutorService) ⇒ {
+      val fa = pa(es)
+      val fb = pb(es)
+      val fc = pc(es)
+      val fd = pd(es)
+      UnitFuture(f(fa.get, fb.get, fc.get, fd.get))
+    }
+
   def fork[A](a: ⇒ Par[A]): Par[A] =
     es ⇒ es.submit(new Callable[A] {
       def call = a(es).get

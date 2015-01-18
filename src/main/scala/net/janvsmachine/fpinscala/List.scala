@@ -2,12 +2,8 @@ package net.janvsmachine.fpinscala
 
 import scala.annotation.tailrec
 
-sealed trait List[+A] {
-  def tail: List[A]
-}
-case object Nil extends List[Nothing] {
-  def tail = throw new IllegalArgumentException("Can't get tail of empty list")
-}
+sealed trait List[+A]
+case object Nil extends List[Nothing]
 case class Cons[+A](head: A, tail: List[A]) extends List[A]
 
 object List {
@@ -31,7 +27,7 @@ object List {
   // Exercise 3.4
   def drop[A](as: List[A], n: Int): List[A] = as match {
     case Nil         ⇒ Nil
-    case l if n == 0 ⇒ l
+    case l if n <= 0 ⇒ l
     case Cons(h, t)  ⇒ drop(t, n - 1)
   }
 
@@ -54,13 +50,10 @@ object List {
   }
 
   // Exercise 3.10
-  def foldLeft[A, B](as: List[A], z: B)(f: (B, A) ⇒ B): B = {
-    @tailrec
-    def foldLeftAcc[A, B](as: List[A], acc: B)(f: (B, A) ⇒ B): B = as match {
-      case Nil        ⇒ acc
-      case Cons(h, t) ⇒ foldLeftAcc(t, f(acc, h))(f)
-    }
-    foldLeftAcc(as, z)(f)
+  @tailrec
+  def foldLeft[A, B](as: List[A], z: B)(f: (B, A) ⇒ B): B = as match {
+    case Nil        ⇒ z
+    case Cons(h, t) ⇒ foldLeft(t, f(z, h))(f)
   }
 
   // Exercise 3.11
@@ -70,7 +63,7 @@ object List {
 
   // Exercise 3.12.
   def reverse[A](as: List[A]): List[A] =
-    foldLeft(as, List[A]())((xs: List[A], x: A) ⇒ Cons(x, xs))
+    foldLeft(as, List[A]())((acc, h) ⇒ Cons(h, acc))
 
   // Exercise 3.13: Write foldLeft in terms of foldRight!
   def foldLeftR[A, B](as: List[A], z: B)(f: (B, A) ⇒ B): B =

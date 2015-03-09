@@ -25,9 +25,9 @@ class ListTests extends FlatSpec {
     assert(foldLeft(l, 0)(_ + _) == foldLeftR(l, 0)(_ + _))
   }
 
-  it should "implement foldRight and foldRightL (using foldLeft)" in {
+  it should "implement foldRight1 and foldRight (the latter using foldLeft)" in {
     assert(foldRight(l, 0)(_ + _) == sum(l))
-    assert(foldRight(l, 0)(_ + _) == foldRightL(l, 0)(_ + _))
+    assert(foldRight1(l, 0)(_ + _) == foldRight(l, 0)(_ + _))
   }
 
   // Exercise 3.8.
@@ -42,6 +42,12 @@ class ListTests extends FlatSpec {
 
   it should "implement append" in {
     assert(append(l, l2) == List(1, 2, 3, 4, 5, 6, 7, 8, 9))
+  }
+
+  it should "implement concat" in {
+    assert(concat(Nil) == Nil)
+    assert(concat(List(Nil, l2)) == l2)
+    assert(concat(List(l, l2)) == append(l, l2))
   }
 
   it should "append add1" in {

@@ -44,9 +44,9 @@ object List {
     case Cons(h, t)   ⇒ Cons(h, dropLast(t))
   }
 
-  def foldRight[A, B](as: List[A], z: B)(f: (A, B) ⇒ B): B = as match {
+  def foldRight1[A, B](as: List[A], z: B)(f: (A, B) ⇒ B): B = as match {
     case Nil        ⇒ z
-    case Cons(h, t) ⇒ f(h, foldRight(t, z)(f))
+    case Cons(h, t) ⇒ f(h, foldRight1(t, z)(f))
   }
 
   // Exercise 3.10
@@ -70,42 +70,74 @@ object List {
     foldRight(as, z)((a: A, b: B) ⇒ f(b, a))
 
   // foldRight in terms of foldLeft!
-  def foldRightL[A, B](as: List[A], z: B)(f: (A, B) ⇒ B): B =
-    foldLeft(as, z)((b: B, a: A) ⇒ f(a, b))
+  def foldRight[A, B](as: List[A], z: B)(f: (A, B) ⇒ B): B =
+    foldLeft(reverse(as), z)((b: B, a: A) ⇒ f(a, b))
 
   // Exercise 3.14
   def append[A](xs: List[A], ys: List[A]): List[A] =
-    foldRight(xs, ys)((a: A, as: List[A]) ⇒ Cons(a, as))
+    foldRight(xs, ys)(Cons(_, _))
+
+  // Exercise 3.15
+  def concat[A](xs: List[List[A]]): List[A] =
+    foldRight(xs, Nil: List[A])((h, acc) => append(h, acc))
 
   // Exercise 3.16
-  def add1(as: List[Int]): List[Int] = as match {
-    case Nil         ⇒ Nil
-    case Cons(x, xs) ⇒ Cons(x + 1, add1(xs))
-  }
+  def add1(as: List[Int]): List[Int] =
+    foldRight(as, Nil: List[Int])((h, t) => Cons(h + 1, t))
 
-  def doublesToString(ds: List[Double]): List[String] = ds match {
-    case Nil         ⇒ Nil
-    case Cons(x, xs) ⇒ Cons(x.toString, doublesToString(xs))
-  }
+  // Exercise 3.17
+  def doublesToString(ds: List[Double]): List[String] =
+    foldRight(ds, Nil: List[String])((h, t) => Cons(h.toString, t))
 
   // Exercise 3.18
-  def map[A, B](as: List[A])(f: A ⇒ B): List[B] = as match {
-    case Nil         ⇒ Nil
-    case Cons(x, xs) ⇒ Cons(f(x), map(xs)(f))
+
+  // Simple solution.
+  def mapSimple[A, B](as: List[A])(f: A ⇒ B): List[B] =
+    foldRight(as, Nil: List[B])((h, t) => Cons(f(h), t))
+
+  // Variation of map using internal mutable buffer.
+  def map[A, B](as: List[A])(f: A ⇒ B): List[B] = {
+    val buf = new collection.mutable.ListBuffer[B]
+    def go(l: List[A]): Unit = l match {
+      case Nil        => ()
+      case Cons(h, t) => buf += f(h); go(t)
+    }
+    go(as)
+    List(buf.toList: _*)
   }
 
   // Exercise 3.19
-  def filter[A](as: List[A])(f: A ⇒ Boolean): List[A] = as match {
-    case Nil                 ⇒ Nil
-    case Cons(x, xs) if f(x) ⇒ Cons(x, filter(xs)(f))
-    case Cons(x, xs)         ⇒ filter(xs)(f)
+
+  // The simple solution using a fold.
+  def filterSimple[A](as: List[A])(f: A ⇒ Boolean): List[A] =
+    foldRight(as, Nil: List[A])((h, t) => if (f(h)) Cons(h, t) else t)
+
+  // A more efficient solution, using an internal mutable buffer.
+  def filter[A](as: List[A])(f: A ⇒ Boolean): List[A] = {
+    val buf = new collection.mutable.ListBuffer[A]
+    def go(l: List[A]): Unit = l match {
+      case Nil        => ()
+      case Cons(h, t) => if (f(h)) buf += h; go(t)
+    }
+    go(as)
+    List(buf.toList: _*)
   }
 
   // Exercise 3.20
-  def flatMap[A, B](as: List[A])(f: A ⇒ List[B]): List[B] = as match {
-    case Nil         ⇒ Nil
-    case Cons(x, xs) ⇒ append(f(x), flatMap(xs)(f))
-  }
+
+  // Basic implementation not using any other function.
+  def flatMap1[A, B](as: List[A])(f: A ⇒ List[B]): List[B] = as match {
+      case Nil         ⇒ Nil
+      case Cons(x, xs) ⇒ append(f(x), flatMap1(xs)(f))
+    }
+
+  // flatMap implemented using foldRight.
+  def flatMapUsingFoldRight[A, B](as: List[A])(f: A ⇒ List[B]): List[B] =
+    foldRight(as, Nil: List[B])((h, acc) => append(f(h), acc))
+
+  // flatMap using concat.
+  def flatMap[A, B](as: List[A])(f: A ⇒ List[B]): List[B] =
+    concat(map(as)(f))
 
   // Exercise 3.21
   def filterFl[A](as: List[A])(p: A ⇒ Boolean): List[A] =
@@ -124,6 +156,6 @@ object List {
     case (Cons(x, xs), Cons(y, ys)) ⇒ (x == y && hasSubsequence(xs, ys)) || hasSubsequence(xs, sub)
   }
 
-  def length(as: List[Int]) = foldLeft(as, 0)((acc, _) ⇒ acc + 1)
+  def length(as: List[Int]) = foldRight(as, 0)((_, acc) ⇒ acc + 1)
 
 }

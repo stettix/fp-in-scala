@@ -4,7 +4,7 @@ version := "0.0.1-SNAPSHOT"
 
 organization := "net.janvsmachine"
 
-scalaVersion := "2.11.4"
+scalaVersion := "2.11.6"
 
 libraryDependencies ++= {
   Seq(

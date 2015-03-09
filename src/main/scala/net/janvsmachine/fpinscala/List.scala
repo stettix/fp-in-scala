@@ -15,20 +15,20 @@ object List {
   // Exercise 3.2
   def tail[A](as: List[A]): List[A] = as match {
     case Nil        ⇒ throw new IllegalArgumentException("Can't get tail of empty list")
-    case Cons(h, t) ⇒ t
+    case Cons(_, t) ⇒ t
   }
 
   // Exercise 3.3
   def setHead[A](as: List[A], newHead: A): List[A] = as match {
     case Nil        ⇒ throw new IllegalArgumentException("Can't replace head of empty list")
-    case Cons(h, t) ⇒ Cons(newHead, t)
+    case Cons(_, t) ⇒ Cons(newHead, t)
   }
 
   // Exercise 3.4
   def drop[A](as: List[A], n: Int): List[A] = as match {
     case Nil         ⇒ Nil
     case l if n <= 0 ⇒ l
-    case Cons(h, t)  ⇒ drop(t, n - 1)
+    case Cons(_, t)  ⇒ drop(t, n - 1)
   }
 
   // Exercise 3.5

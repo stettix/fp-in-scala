@@ -7,49 +7,43 @@ case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
 object Tree {
 
   // Exercise 3.25
-  def size[A](t: Tree[A]): Int = t match {
+  def size1[A](t: Tree[A]): Int = t match {
     case Leaf(_)             ⇒ 1
     case Branch(left, right) ⇒ 1 + size(left) + size(right)
   }
 
   // Exercise 3.26
-  def maximum(t: Tree[Int]): Int = t match {
+  def maximum1(t: Tree[Int]): Int = t match {
     case Leaf(value)         ⇒ value
-    case Branch(left, right) ⇒ maximum(left) max maximum(right)
+    case Branch(left, right) ⇒ maximum1(left) max maximum1(right)
   }
 
   // Exercise 3.27
-  def depth[A](t: Tree[A]): Int = t match {
-    case Leaf(_)             ⇒ 1
-    case Branch(left, right) ⇒ 1 + (depth(left) max depth(right))
+  def depth1[A](t: Tree[A]): Int = t match {
+    case Leaf(_)             ⇒ 0
+    case Branch(left, right) ⇒ 1 + (depth1(left) max depth1(right))
   }
 
   // Exercise 3.28
-  def map[A, B](t: Tree[A])(f: A ⇒ B): Tree[B] = t match {
+  def map1[A, B](t: Tree[A])(f: A ⇒ B): Tree[B] = t match {
     case Leaf(v)             ⇒ Leaf(f(v))
-    case Branch(left, right) ⇒ Branch(map(left)(f), map(right)(f))
+    case Branch(left, right) ⇒ Branch(map1(left)(f), map1(right)(f))
   }
 
   // Exercise 3.29
-  def fold[A, B](t: Tree[A], z: B)(f: (B, A) ⇒ B, comb: (B, B) ⇒ B): B = t match {
-    case Leaf(v)             ⇒ f(z, v)
-    case Branch(left, right) ⇒ comb(fold(left, z)(f, comb), fold(right, z)(f, comb)) // fold(left, fold(right, z)(f))(f)
+  def fold[A, B](t: Tree[A])(f: A ⇒ B)(g: (B, B) ⇒ B): B = t match {
+    case Leaf(v)             ⇒ f(v)
+    case Branch(left, right) ⇒ g(fold(left)(f)(g), fold(right)(f)(g))
   }
 
-  // TODO!
-  //  def fold[A, B](t: Tree[A], z: B)(f: (B, A) ⇒ B, g: (B, B) ⇒ B): B = t match {
-  //    case Leaf(v)             ⇒ g(z, f(z, v))
-  //    case Branch(left, right) ⇒ ??? //g(fold(left, f(z + 1)(f, g), fold(right, z + 1)(f, g))
-  //  }
+  // Implementations in terms of fold.
 
-  def depthF[A](t: Tree[A]): Int = fold(t, 0)((acc: Int, _: A) ⇒ acc + 1, (x: Int, y: Int) ⇒ x max y)
+  def depth[A](t: Tree[A]): Int = fold(t)(_ ⇒ 0)((x: Int, y: Int) ⇒ 1 + (x max y))
 
-  def sizeF[A](t: Tree[A]): Int = fold(t, 0)((acc: Int, _: A) ⇒ acc + 1, (x: Int, y: Int) ⇒ x + y)
+  def size[A](t: Tree[A]): Int = fold(t)(_ => 1)((x: Int, y: Int) ⇒ 1 + x + y)
 
-  def maximumF(t: Tree[Int]): Int = fold(t, Int.MinValue)((acc: Int, a: Int) ⇒ acc max a, (x: Int, y: Int) ⇒ x + y)
+  def maximum(t: Tree[Int]): Int = fold(t)(a => a)((x: Int, y: Int) ⇒ x max y)
 
-  // Could perhaps try to do the version of fold that works for size/maximum/depth?
-  // And then see how I could adapt it to the map case too?
-  //def mapF[A, B](t: Tree[A])(f: A => B): Tree[B] = fold(t)(a: A => Leaf(f(a)), (x: B, y: B) => Branch(x, y)
+  def map[A, B](t: Tree[A])(f: A => B): Tree[B] = fold(t)(a => Leaf(f(a)): Tree[B])(Branch(_, _))
 
 }

@@ -1,10 +1,9 @@
 package net.janvsmachine.fpinscala
 
-import org.scalacheck.Properties
 import org.scalacheck.Prop._
-import org.scalatest.prop.Checkers
 import org.scalatest.PropSpec
 import org.scalatest.FlatSpec
+import org.scalatestplus.scalacheck
 
 class Chapter4Tests extends FlatSpec {
 
@@ -15,22 +14,22 @@ class Chapter4Tests extends FlatSpec {
 
   "A None value" should "comply with contract" in {
     assert(none.map(_.length) == None)
-    assert(none.flatMap(v ⇒ None) == None)
-    assert(none.flatMap(v ⇒ Some(v.length)) == None)
+    assert(none.flatMap(v => None) == None)
+    assert(none.flatMap(v => Some(v.length)) == None)
     assert(none.getOrElse("foo") == "foo")
     assert(none.orElse("foo") == Some("foo"))
-    assert(none.filter(v ⇒ true) == None)
-    assert(none.filter(v ⇒ false) == None)
+    assert(none.filter(v => true) == None)
+    assert(none.filter(v => false) == None)
   }
 
   "A Some() value" should "comply with contract" in {
     assert(value.map(_.length) == Some(2))
-    assert(value.flatMap(v ⇒ None) == None)
-    assert(value.flatMap(v ⇒ Some(v.length)) == Some(2))
+    assert(value.flatMap(v => None) == None)
+    assert(value.flatMap(v => Some(v.length)) == Some(2))
     assert(value.getOrElse("foo") == "42")
     assert(value.orElse("foo") == value)
-    assert(value.filter(v ⇒ true) == value)
-    assert(value.filter(v ⇒ false) == None)
+    assert(value.filter(v => true) == value)
+    assert(value.filter(v => false) == None)
   }
 
   "The variance of a sequence" should "be None for an empty sequence" in {
@@ -69,15 +68,15 @@ class Chapter4Tests extends FlatSpec {
 
 }
 
-class MapTests extends PropSpec with Checkers {
+class MapTests extends PropSpec with scalacheck.Checkers {
 
   import Option._
 
-  val f = (x: Int, y: Int) ⇒ x + y
+  val f = (x: Int, y: Int) => x + y
 
   property("Alternative implementations map should always give some result") {
     check {
-      forAll { (a: Int, b: Int) ⇒
+      forAll { (a: Int, b: Int) =>
         // Not very clever - would be nice if PropSpec could generate optional values - but seems it can't?
         map2(Some(a), Some(b))(f) == map2a(Some(a), Some(b))(f)
         map2(None, Some(b))(f) == map2a(None, Some(b))(f)

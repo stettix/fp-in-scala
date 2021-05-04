@@ -1,11 +1,8 @@
 package net.janvsmachine.fpinscala
 
-import org.junit.runner.RunWith
 import org.scalatest.FlatSpec
-import org.scalatest.junit.JUnitRunner
 import Stream._
 
-@RunWith(classOf[JUnitRunner])
 class StreamTests extends FlatSpec {
 
   "An empty stream" should "comply with spec" in {
@@ -41,7 +38,7 @@ class StreamTests extends FlatSpec {
   }
 
   it should "implement forAll" in {
-    assert(empty[Int].forAll(_ ⇒ false))
+    assert(empty[Int].forAll(_ => false))
     assert(Stream(1, 2, 3).forAll(_ > 0))
     assert(!Stream(1, 2, 3).forAll(_ < 3))
   }
@@ -52,13 +49,13 @@ class StreamTests extends FlatSpec {
   }
 
   it should "implement map" in {
-    assert(empty.map(_.toString) == empty)
+    assert(empty[Int].map(_.toString) == empty)
     assert(Stream(1, 2, 3, 4).map(_.toString).toList == List("1", "2", "3", "4"))
   }
 
   it should "implement filter" in {
-    assert(empty.filter(_ ⇒ false) == empty)
-    assert(empty.filter(_ ⇒ true) == empty)
+    assert(empty[String].filter(_ => false) == empty)
+    assert(empty[String].filter(_ => true) == empty)
     assert(Stream(1, 2, 3, 4).filter(_ % 2 == 0).toList == List(2, 4))
   }
 
@@ -70,14 +67,14 @@ class StreamTests extends FlatSpec {
   }
 
   it should "implement flatMap" in {
-    def doubler[T] = (x: T) ⇒ Stream(x, x)
+    def doubler[T] = (x: T) => Stream(x, x)
     assert(empty.flatMap(doubler) == empty)
     assert(Stream(1, 2, 3).flatMap(doubler).toList == List(1, 1, 2, 2, 3, 3))
   }
 
   it should "implement find" in {
-    assert(empty.find(_ ⇒ false) == None)
-    assert(empty.find(_ ⇒ true) == None)
+    assert(empty[String].find(_ => false) == None)
+    assert(empty[String].find(_ => true) == None)
     assert(Stream(1, 2, 3, 4).find(_ % 2 == 0) == Some(2))
   }
 

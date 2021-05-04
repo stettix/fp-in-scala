@@ -12,7 +12,7 @@ class MachineTests extends FlatSpec {
 
   "An empty candy dispenser" should "ignore all inputs" in {
     val allInputs = Seq(Nil, List(Coin), List(Turn))
-    for (inputs ← allInputs) {
+    for (inputs <- allInputs) {
       val ((coins, candies), _) = simulateMachine(inputs)(emptyMachine)
       assert(coins == 0 && candies == 0)
     }

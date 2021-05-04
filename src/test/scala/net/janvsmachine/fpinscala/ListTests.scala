@@ -37,7 +37,7 @@ class ListTests extends FlatSpec {
   }
 
   it should "implement flatMap" in {
-    assert(flatMap(l)(x ⇒ List(x, x)) == List(1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6))
+    assert(flatMap(l)(x => List(x, x)) == List(1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6))
   }
 
   it should "implement append" in {

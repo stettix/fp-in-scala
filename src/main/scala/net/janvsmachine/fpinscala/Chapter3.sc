@@ -5,7 +5,7 @@ import Chapter3._
 
 object fp {
 
-  val lte = (x: Int, y: Int) ⇒ x >= y             //> lte  : (Int, Int) => Boolean = <function2>
+  val lte = (x: Int, y: Int) => x >= y             //> lte  : (Int, Int) => Boolean = <function2>
   Array(1, 2, 3).sortWith(lte)                    //> res0: Array[Int] = Array(3, 2, 1)
   isSorted(Array(1, 1), lte)                      //> res1: Boolean = true
 
@@ -28,7 +28,7 @@ object fp {
   drop(l, 10)                                     //> res6: net.janvsmachine.fpinscala.List[Int] = Nil
 
   // Exercise 3.5
-  dropWhile(l, (x: Int) ⇒ x < 4)                  //> res7: net.janvsmachine.fpinscala.List[Int] = Cons(4,Cons(5,Cons(6,Nil)))
+  dropWhile(l, (x: Int) => x < 4)                  //> res7: net.janvsmachine.fpinscala.List[Int] = Cons(4,Cons(5,Cons(6,Nil)))
 
   // Exercise 3.6
   dropLast(l)                                     //> res8: net.janvsmachine.fpinscala.List[Int] = Cons(1,Cons(2,Cons(3,Cons(4,Con
@@ -38,7 +38,7 @@ object fp {
   foldRight(l, 0)(_ + _)                          //> res9: Int = 21
 
   // Exercise 3.9
-  foldRight(l, 0)((n: Int, acc: Int) ⇒ acc + 1)   //> res10: Int = 6
+  foldRight(l, 0)((n: Int, acc: Int) => acc + 1)   //> res10: Int = 6
   
   // Exercise 3.10
   foldLeft(l, 0)(_ + _)                           //> res11: Int = 21

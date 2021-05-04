@@ -1,20 +1,18 @@
 package net.janvsmachine.fpinscala
 
-import org.scalacheck.Gen
-import org.scalacheck.Properties
 import org.scalacheck.Prop._
 import org.scalatest.FlatSpec
-import org.scalatest.prop.Checkers
 import org.scalatest.PropSpec
 import List._
 import RNG._
 import org.scalatest.prop.Whenever
+import org.scalatestplus.scalacheck
 
-class RandomPropSpecs extends PropSpec with Checkers with Whenever {
+class RandomPropSpecs extends PropSpec with scalacheck.Checkers with Whenever {
 
   property("nonNegativeInt returns values in the correct range") {
     check {
-      forAll { (n: Int) ⇒
+      forAll { (n: Int) =>
         nonNegativeInt(SimpleRNG(n))._1 >= 0
       }
     }
@@ -22,7 +20,7 @@ class RandomPropSpecs extends PropSpec with Checkers with Whenever {
 
   property("double returns values in the correct range") {
     check {
-      forAll { (n: Int) ⇒
+      forAll { (n: Int) =>
         val d = double(SimpleRNG(n))._1
         d >= 0 && d < 1.0
       }
@@ -31,7 +29,7 @@ class RandomPropSpecs extends PropSpec with Checkers with Whenever {
 
   property("nonNegativeLessThan generates values in the expected range") {
     check {
-      forAll { (n: Int) ⇒
+      forAll { (n: Int) =>
         n <= 0 || {
           val i = nonNegativeLessThan(n)(SimpleRNG(42))._1
           (i >= 0 && i < n)

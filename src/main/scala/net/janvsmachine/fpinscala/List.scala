@@ -98,6 +98,7 @@ object List {
   // Variation of map using internal mutable buffer.
   def map[A, B](as: List[A])(f: A => B): List[B] = {
     val buf = new collection.mutable.ListBuffer[B]
+    @tailrec
     def go(l: List[A]): Unit = l match {
       case Nil        => ()
       case Cons(h, t) => buf += f(h); go(t)

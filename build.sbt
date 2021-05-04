@@ -7,16 +7,18 @@ organization := "net.janvsmachine"
 scalaVersion := "2.13.5"
 
 scalacOptions ++= Seq(
-  "-encoding", "UTF-8",
+  "-encoding",
+  "UTF-8",
   "-deprecation",
   "-unchecked",
   "-feature",
-  "-language:higherKinds",
+  "-language:higherKinds"
 )
 
 libraryDependencies ++= {
   Seq(
-    "org.scalatest"       %% "scalatest"            % "3.0.9" % Test,
-    "org.scalacheck"      %% "scalacheck"           % "1.14.1" % Test
+    "org.scalatest" %% "scalatest" % "3.0.9" % Test,
+    "org.scalacheck" %% "scalacheck" % "1.14.1" % Test,
+    "org.scalameta" %% "munit" % "0.7.25" % Test
   )
 }

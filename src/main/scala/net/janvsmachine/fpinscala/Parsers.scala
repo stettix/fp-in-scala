@@ -17,9 +17,6 @@ trait Parsers[ParseError, Parser[+ _]] { self =>
 
   def flatMap[A, B](p: Parser[A])(f: A => Parser[B]): Parser[B]
 
-  def listOfN[A](n: Int, p: Parser[A]): Parser[List[A]] =
-    map2(p, listOfN(n - 1, p))(Cons(_, _))
-
   def slice[A](p: Parser[A]): Parser[String]
 
   // Derived combinators
@@ -45,6 +42,9 @@ trait Parsers[ParseError, Parser[+ _]] { self =>
   def char(c: Char): Parser[Char] =
     string(c.toString).map(_.charAt(0))
 
+  def listOfN[A](n: Int, p: Parser[A]): Parser[List[A]] =
+    map2(p, listOfN(n - 1, p))(Cons(_, _))
+
   implicit def operators[A](p: Parser[A]): ParserOps[A]
 
   implicit def asStringParser[A](a: A)(implicit f: A => Parser[String]): ParserOps[String] = ParserOps(f(a))
@@ -60,7 +60,6 @@ trait Parsers[ParseError, Parser[+ _]] { self =>
     def many(p: Parser[A]): Parser[List[A]] = self.many(p)
     def many1(p: Parser[A]): Parser[List[A]] = self.many1(p)
     def slice(p: Parser[A]): Parser[String] = self.slice(p)
-
   }
 
   object Laws {

@@ -1,11 +1,11 @@
-package net.janvsmachine.fpinscala
+package net.janvsmachine.fpinscala.parsing
 
-import fpinscala.testing.Prop._
-import fpinscala.testing._
+import fpinscala.testing.Prop.forAll
+import fpinscala.testing.{Gen, Prop}
+import net.janvsmachine.fpinscala.{Cons, Either, List, Right}
 
-import scala.language.implicitConversions
-
-trait Parsers[ParseError, Parser[+ _]] { self =>
+trait Parsers[ParseError, Parser[+ _]] {
+  self =>
 
   def run[A](p: Parser[A])(input: String): Either[ParseError, A]
 
@@ -53,7 +53,6 @@ trait Parsers[ParseError, Parser[+ _]] { self =>
     def or[B >: A](p2: Parser[B]): Parser[B] = self.or(p, p2)
     def |[B >: A](p2: Parser[B]): Parser[B] = self.or(p, p2)
     def **[B >: A](p2: Parser[B]): Parser[(A, B)] = self.product(p, p2)
-
     def map[B](f: A => B): Parser[B] = self.map(p)(f)
     def map2[B, C](p1: Parser[A], p2: Parser[B])(f: (A, B) => C): Parser[C] = self.map2(p1, p2)(f)
     def flatMap[B](f: A => Parser[B]): Parser[B] = self.flatMap(p)(f)

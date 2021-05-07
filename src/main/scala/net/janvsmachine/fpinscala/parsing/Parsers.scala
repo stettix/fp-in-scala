@@ -2,7 +2,10 @@ package net.janvsmachine.fpinscala.parsing
 
 import fpinscala.testing.Prop.forAll
 import fpinscala.testing.{Gen, Prop}
-import net.janvsmachine.fpinscala.{Cons, Either, List, Right}
+//import net.janvsmachine.fpinscala.{Cons, Either, List, Right}
+
+import scala.language.implicitConversions
+import scala.util.matching.Regex
 
 trait Parsers[ParseError, Parser[+ _]] {
   self =>
@@ -19,6 +22,8 @@ trait Parsers[ParseError, Parser[+ _]] {
 
   def slice[A](p: Parser[A]): Parser[String]
 
+  def regex(r: Regex): Parser[String]
+
   // Derived combinators
 
   def map[A, B](p: Parser[A])(f: A => B): Parser[B] =
@@ -34,16 +39,33 @@ trait Parsers[ParseError, Parser[+ _]] {
     for { a <- p1; b <- p2 } yield f(a, b)
 
   def many[A](p: Parser[A]): Parser[List[A]] =
-    map2(p, many(p))(Cons(_, _)) or succeed(List())
+    map2(p, many(p))(_ :: _) or succeed(List())
 
   def many1[A](p: Parser[A]): Parser[List[A]] =
-    map2(p, many(p))((a, as) => Cons(a, as))
+    map2(p, many(p))((a, as) => a :: as)
+
+  def optional[A](p: Parser[A]): Parser[Option[A]] =
+    p.map(Some(_)).or(succeed(None))
+
+  def optionalOr[A](p: Parser[A], default: => A): Parser[A]
 
   def char(c: Char): Parser[Char] =
     string(c.toString).map(_.charAt(0))
 
   def listOfN[A](n: Int, p: Parser[A]): Parser[List[A]] =
-    map2(p, listOfN(n - 1, p))(Cons(_, _))
+    map2(p, listOfN(n - 1, p))(_ :: _)
+
+  def first[A, B](p: Parser[(A, B)]): Parser[A] =
+    p.map { case (a, _) => a }
+
+  def last[A, B](p: Parser[(A, B)]): Parser[B] =
+    p.map { case (_,b) => b }
+
+  def takeMiddle[A, B, C](p: Parser[((A, B), C)]): Parser[B] =
+    p.map { case ((_, m), _) => m }
+
+  def dropMiddle[A, B, C](p: Parser[((A, B), C)]): Parser[(A, C)] =
+    p.map { case ((a, _), c) => (a, c) }
 
   implicit def operators[A](p: Parser[A]): ParserOps[A]
 
@@ -52,13 +74,16 @@ trait Parsers[ParseError, Parser[+ _]] {
   case class ParserOps[A](p: Parser[A]) {
     def or[B >: A](p2: Parser[B]): Parser[B] = self.or(p, p2)
     def |[B >: A](p2: Parser[B]): Parser[B] = self.or(p, p2)
-    def **[B >: A](p2: Parser[B]): Parser[(A, B)] = self.product(p, p2)
+    def **[B](p2: Parser[B]): Parser[(A, B)] = self.product(p, p2)
     def map[B](f: A => B): Parser[B] = self.map(p)(f)
     def map2[B, C](p1: Parser[A], p2: Parser[B])(f: (A, B) => C): Parser[C] = self.map2(p1, p2)(f)
     def flatMap[B](f: A => Parser[B]): Parser[B] = self.flatMap(p)(f)
-    def many(p: Parser[A]): Parser[List[A]] = self.many(p)
-    def many1(p: Parser[A]): Parser[List[A]] = self.many1(p)
-    def slice(p: Parser[A]): Parser[String] = self.slice(p)
+    def many: Parser[List[A]] = self.many(p)
+    def many1: Parser[List[A]] = self.many1(p)
+    def optional: Parser[Option[A]] = self.optional(p)
+    def optionalOr(default: => A): Parser[A] = self.optionalOr(p, default)
+    def slice: Parser[String] = self.slice(p)
+    //def middle[B, C](p: Parser[(A, (B, C))]): Parser[B] = self.middle(p)
   }
 
   object Laws {

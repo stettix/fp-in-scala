@@ -3,7 +3,7 @@ package net.janvsmachine.fpinscala.parsing
 sealed trait Json
 
 object Json {
-  case object JNull extends Json
+  case class JNull() extends Json // Had to make this a class instead of object to make Parser[JNull] work
   case class JNumber(get: Double) extends Json
   case class JString(get: String) extends Json
   case class JBool(get: Boolean) extends Json
@@ -14,7 +14,7 @@ object Json {
     import P._
 
     // TODO: Whitespace!
-    val spaces: Parser[String] = char(' ').many.slice
+    val ws: Parser[String] = regex("\\s".r)
 
     val name: Parser[String] = regex("\\w".r)
 
@@ -32,32 +32,39 @@ object Json {
         .map(JString)
 
     val booleanLiteral: Parser[JBool] =
-      (string("true") | string("True") | string("false") | string("False"))
+      (string("true") | string("false"))
         .map(b => JBool(b.toBoolean))
 
-    lazy val jsonValue: Parser[Json] = numberLiteral | stringLiteral | booleanLiteral | array | jsonValue
-
-    lazy val literalAndSeparator: Parser[Json] =
-      first(jsonValue ** char(','))
-
-    lazy val arrayMembers: Parser[List[Json]] =
-      (many(literalAndSeparator) ** jsonValue)
-        .map { case (ls, l) => ls ++ List(l) }
-        .or(succeed(List.empty))
+    val nullLiteral: Parser[JNull] =
+      string("null").map(_ => JNull())
 
     lazy val array: Parser[JArray] =
-      takeMiddle(char('[') ** (arrayMembers | succeed(List.empty)) ** char(']'))
-        .map(ls => JArray(ls.toVector))
+      ((char('[') ** ws ** char(']')).map(_ => List.empty) or
+        takeMiddle(char('[') ** elements ** char(']')))
+        .map(es => JArray(es.toVector))
 
-    lazy val objectKeyValue: Parser[(String, Json)] =
-      dropMiddle(identifier ** char(':') ** jsonValue)
+    lazy val element: Parser[Json] = takeMiddle(ws ** value ** ws)
 
-    lazy val objectMembers: Parser[List[(String, Json)]] =
-      many(first(objectKeyValue ** char(','))) or objectKeyValue.map(List(_)) or succeed(List.empty)
+    lazy val elements: Parser[List[Json]] =
+      element.map(List(_)) or
+        (first(element ** char(',')).map(List(_)) ** elements).map { case (a, b) => a ++ b }
+
+    lazy val member: Parser[(String, Json)] =
+      dropMiddle(takeMiddle(ws ** identifier ** ws) ** char(':') ** element)
+
+    lazy val members: Parser[List[(String, Json)]] =
+      member.map(List(_)) or
+        (first(member ** char(',')).map(List(_)) ** members).map { case (a, b) => a ++ b }
 
     lazy val jsonObject: Parser[JObject] =
-      takeMiddle(char('{') ** objectMembers.map(m => JObject(m.toMap)) ** char('}'))
+      ((char('{') ** ws ** char('{')).map(_ => List.empty) or
+        takeMiddle(char('{') ** members ** char('}')))
+        .map(m => JObject(m.toMap))
 
-    array | jsonObject
+    lazy val value: Parser[Json] = jsonObject | array | stringLiteral | numberLiteral | booleanLiteral | nullLiteral
+
+    val json = element
+
+    json
   }
 }

@@ -58,9 +58,6 @@ object Json {
     lazy val jsonObject: Parser[JObject] =
       takeMiddle(char('{') ** objectMembers.map(m => JObject(m.toMap)) ** char('}'))
 
-    lazy val jsonTopLevel: Parser[Json] =
-      array | jsonObject
-
-    ???
+    array | jsonObject
   }
 }

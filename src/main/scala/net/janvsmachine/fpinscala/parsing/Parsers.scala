@@ -1,28 +1,36 @@
 package net.janvsmachine.fpinscala.parsing
 
 import fpinscala.testing.Prop.forAll
-import fpinscala.testing.{Gen, Prop}
-//import net.janvsmachine.fpinscala.{Cons, Either, List, Right}
+import fpinscala.testing.{Gen, Prop, SGen}
 
 import scala.language.implicitConversions
 import scala.util.matching.Regex
 
-trait Parsers[ParseError, Parser[+ _]] {
+trait Parsers[Parser[+ _]] {
   self =>
 
   def run[A](p: Parser[A])(input: String): Either[ParseError, A]
+
+  def errorMessage(pe: ParseError): String
 
   // Fundamental combinators
 
   implicit def string(s: String): Parser[String]
 
-  def or[A](p1: Parser[A], p2: => Parser[A]): Parser[A]
-
   def flatMap[A, B](p: Parser[A])(f: A => Parser[B]): Parser[B]
+
+  def or[A](p1: Parser[A], p2: => Parser[A]): Parser[A]
 
   def slice[A](p: Parser[A]): Parser[String]
 
   def regex(r: Regex): Parser[String]
+
+  def label[A](msg: String)(p: Parser[A]): Parser[A]
+
+  def scope[A](msg: String)(p: Parser[A]): Parser[A]
+
+  def attempt[A](p: Parser[A]): Parser[A]
+
 
   // Derived combinators
 
@@ -83,7 +91,16 @@ trait Parsers[ParseError, Parser[+ _]] {
     def optional: Parser[Option[A]] = self.optional(p)
     def optionalOr(default: => A): Parser[A] = self.optionalOr(p, default)
     def slice: Parser[String] = self.slice(p)
-    //def middle[B, C](p: Parser[(A, (B, C))]): Parser[B] = self.middle(p)
+  }
+
+  case class ParseError(stack: List[(Location, String)])
+
+  case class Location(input: String, offset: Int = 0) {
+    lazy val line = input.slice(0, offset + 1).count(_ == '\n') + 1
+    lazy val col = input.slice(0, offset + 1).lastIndexOf('\n') match {
+      case -1 => offset + 1
+      case lineStart => offset - lineStart
+    }
   }
 
   object Laws {
@@ -99,6 +116,14 @@ trait Parsers[ParseError, Parser[+ _]] {
 
     def stringLaw(in: Gen[String]): Prop =
       forAll(in)(s => run(string(s))(s) == Right(s))
+
+    def labelLaw[A](p: Parser[A], inputs: SGen[String]): Prop =
+      forAll(inputs ** Gen.string) { case (input, msg) =>
+        run(label(msg)(p))(input) match {
+          case Left(e) => errorMessage(e) == msg
+          case _ => true
+        }
+      }
 
   }
 

@@ -10,7 +10,7 @@ object Json {
   case class JArray(get: IndexedSeq[Json]) extends Json
   case class JObject(get: Map[String, Json]) extends Json
 
-  def jsonParser[Err, Parser[+ _]](P: Parsers[Err, Parser]): Parser[Json] = {
+  def jsonParser[Parser[+ _]](P: Parsers[Parser]): Parser[Json] = {
     import P._
 
     // TODO: Whitespace!
